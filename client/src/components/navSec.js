@@ -14,13 +14,13 @@ function NavSec() {
                 <Navbar.Brand href="/">Treasure</Navbar.Brand>
                 <Navbar.Collapse id="navbarScroll">
                     <Nav className="me-auto">
-                        <Nav.Link href="/">Home</Nav.Link>
+                        {/* <Nav.Link href="/">Home</Nav.Link> */}
                         <Nav.Link href="/finance/calculator/creditCard/repayment">CC Repayment Calculator</Nav.Link>
                         {/* <NavDropdown title="Finance Services" id="nav-dropdown">
                             <NavDropdown.Item eventKey="4.2" href="/finance/calculator/creditCard/repayment">CC Repayment Calculator</NavDropdown.Item>
                         </NavDropdown> */}
                     </Nav>
-                        <Button variant="outline-default">Login</Button>
+                        {/* <Button variant="outline-default">Login</Button> */}
                 </Navbar.Collapse>
             </Container>
         </Navbar>

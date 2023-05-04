@@ -1,12 +1,11 @@
 const redis = require('redis');
 const util = require('util');
 
-const redisUrl = "redis://127.0.0.1:6379";
-const client = redis.createClient();
+const redisUrl = process.env.UPSTASH_REDIS_REST_URL || "redis://127.0.0.1:6379"
+const client = redis.createClient(redisUrl);
 client.hget = util.promisify(client.hget)
 
 const helper = require('../helpers/credit')
-//const { validateCache, setCache, delCache } = require('../helpers/cache');
 
 const redisKey = "cardRepayment";
 

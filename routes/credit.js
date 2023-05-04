@@ -5,5 +5,7 @@ const router = express.Router();
 const creditController = require('../controller/credit');
 
 router.post('/card/repayment', creditController.cardRepayment)
+router.get('/cache/validate', creditController.validateCache)
+router.get('/cache/delete', creditController.deleteCache)
 
 module.exports = router;

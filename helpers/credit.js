@@ -18,36 +18,41 @@ exports.cardRepayment = async (body) => {
         let payment = parseFloat(_body.payment)
         
         let interest = balance * rate
+        let _mad = balance * mad
         if(payment <= interest){
             cards.push({ bank : bank, error : { message : `The payment amount you entered is not large enough to cover the ${this.formatCurreny(interest)} in interest charges for the current period. Please increase the payment to more than ${this.formatCurreny(interest)} and recalculate.`}})
         } else {
-            let card = {
-                "bank" : bank,
-                "balance" : this.formatCurreny(balance),
-                "interest" : rate,
-                "MAD" : mad,
-                "monthlyPayment" : this.formatCurreny(payment),
-                "summary" : [],
-                "payments" : []
-            }
+            if(payment < _mad){
+                cards.push({ bank : bank, error : { message : `The payment amount you entered is not large enough to cover the ${this.formatCurreny(_mad)} in Minimum Amount Due charges for the current period. Please increase the payment to more than ${this.formatCurreny(_mad)} and recalculate.`}})
+            } else {
+                let card = {
+                    "bank" : bank,
+                    "balance" : this.formatCurreny(balance),
+                    "interest" : rate,
+                    "MAD" : mad,
+                    "monthlyPayment" : this.formatCurreny(payment),
+                    "summary" : [],
+                    "payments" : []
+                }
+        
+                let result = await this.getResult(payment, rate, mad, balance, 0, 0, 0, [])
+                if(result){
+                    let months = result.months;
+                    let paymentTotal = result.paymentTotal;
+                    let interestTotal = result.interestTotal;
     
-            let result = await this.getResult(payment, rate, mad, balance, 0, 0, 0, [])
-            if(result){
-                let months = result.months;
-                let paymentTotal = result.paymentTotal;
-                let interestTotal = result.interestTotal;
-
-                total.balance += balance;
-                total.payment += paymentTotal;
-                total.interest += interestTotal;
-                total.monthlyPayment += payment;
-                
-                card.summary.push({"months" : months, "paymentTotal" : this.formatCurreny(paymentTotal), "interestTotal": this.formatCurreny(interestTotal)})
-                result.transactions.forEach(tran => {
-                    card.payments.push(tran)
-                })
+                    total.balance += balance;
+                    total.payment += paymentTotal;
+                    total.interest += interestTotal;
+                    total.monthlyPayment += payment;
+                    
+                    card.summary.push({"months" : months, "paymentTotal" : this.formatCurreny(paymentTotal), "interestTotal": this.formatCurreny(interestTotal)})
+                    result.transactions.forEach(tran => {
+                        card.payments.push(tran)
+                    })
+                }
+                cards.push(card)
             }
-            cards.push(card)
         }
     }
     let response = {

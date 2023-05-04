@@ -4,18 +4,33 @@ import { Stack, Button, Form, Modal, Table } from 'react-bootstrap'
 import axios from 'axios';
 
 function Repayment() {
+    //form variables
     const [bank, setBank] = useState('')
     const [balance, setBalance] = useState('')
     const [payment, setPayment] = useState('')
     const [interest, setInterest] = useState('0.02')
     const [mad, setMad] = useState('0.03')
 
-    const [result, setResult] = useState({})
-    const [errorMessage, setErrorMessage] = useState('')
+    //cache variables
+    const [source, setSource] = useState('')
+    const [cached, setCached] = useState(false);
 
-    const [apiData, setApiData] = useState([])
+    //handles data for computation modal
+    const [result, setResult] = useState({})
+    const handleResult = (type, property) => {
+        if(Object.keys(result).length){
+            if(type == "details"){
+                return result.creditCards[0][property]
+            }
+
+            if(type == "summary"){
+                return result.creditCards[0]["summary"][0][property]
+            }
+        }
+    }
 
     //handle Error modal
+    const [errorMessage, setErrorMessage] = useState('')
     const [showError, setShowError] = useState(false);
     const handleErrorClose = () => setShowError(false);
     const handleErrorShow = () => setShowError(true);
@@ -25,6 +40,8 @@ function Repayment() {
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
 
+    //handle data for payments table
+    const [apiData, setApiData] = useState([])
     //render payments table
     const renderData = (data, index) => {
         return (
@@ -43,31 +60,74 @@ function Repayment() {
         )
     }
 
+    useEffect(() => {
+        axios.get('/api/credit/cache/validate')
+        .then((res) => {
+            if(!res.data.cache) { 
+                setSource(res.data.source) 
+            } else {
+                let cacheData = JSON.parse(res.data.cache.data);
+                if(cacheData.creditCards[0].hasOwnProperty('error')){
+                    setErrorMessage(cacheData.creditCards[0].error.message)
+                    handleErrorShow()
+
+                    setCached(false)
+                } else {
+                    setBank(res.data.cache.bank)
+                    setBalance(res.data.cache.balance)
+                    setPayment(res.data.cache.payment)
+                    setInterest(res.data.cache.rate)
+                    setMad(res.data.cache.mad)
+
+                    setApiData(cacheData.creditCards[0].payments)
+                    setResult(cacheData)
+
+                    setSource(res.data.source)
+                    setCached(true)
+                }
+            }
+        })
+    }, [])
+
+    const clearCache = () => {
+        axios.get('/api/credit/cache/delete')
+        .then((res) => {
+            setBank('')
+            setBalance('')
+            setPayment('')
+            setInterest('0.02')
+            setMad('0.03')
+
+            setApiData([])
+            setResult({})
+
+            setSource(res.data.source)
+            setCached(false)
+        })
+    }
+
     const submitData = (balance, interest, mad, payment) => {
         if(bank != '' && balance != '' && interest != '' && mad != '' && payment != ''){
             axios.post('/api/credit/card/repayment', [{ "bank": bank, "payment": payment, "balance": balance, "rate": interest, "mad": mad }] )
-                .then((res) => {
-                    if(res.data.creditCards[0].hasOwnProperty('error')){
-                        setErrorMessage(res.data.creditCards[0].error.message)
+            .then((res) => {
+                let result = res.data.data;
+                if(result.creditCards[0].hasOwnProperty('error')){
+                    axios.get('/api/credit/cache/delete')
+                    .then((resDel) => {
+                        setErrorMessage(result.creditCards[0].error.message)
                         handleErrorShow()
-                    } else {
-                        setResult(res.data)
-                        setApiData(res.data.creditCards[0].payments)
-                        handleShow()
-                    }
-                })
-        }
-    }
 
-    const handleResult = (type, property) => {
-        if(Object.keys(result).length){
-            if(type == "details"){
-                return result.creditCards[0][property]
-            }
-
-            if(type == "summary"){
-                return result.creditCards[0]["summary"][0][property]
-            }
+                        setSource(resDel.data.source)
+                        setCached(false)
+                    })
+                } else {
+                    setResult(result)
+                    setApiData(result.creditCards[0].payments)
+                    handleShow()
+                    setSource(res.data.source)
+                    setCached(true)
+                }
+            })
         }
     }
 
@@ -77,7 +137,7 @@ function Repayment() {
             <Form>
                 <Form.Group className="mb-3">
                     <Form.Label>Bank Name</Form.Label>
-                    <Form.Control type="text" placeholder="Enter Bank Name" onChange={data => { 
+                    <Form.Control type="text" placeholder="Enter Bank Name" value={bank} onChange={data => { 
                         setBank(data.target.value) 
                         // submitData(balance, interest, payment, res => {
                         //     setApiData(res)
@@ -86,7 +146,7 @@ function Repayment() {
                 </Form.Group>
                 <Form.Group className="mb-3">
                     <Form.Label>Outstanding Balance</Form.Label>
-                    <Form.Control type="number" placeholder="Enter Outstanding balance" onChange={data => { 
+                    <Form.Control type="number" placeholder="Enter Outstanding balance" value={balance} onChange={data => { 
                         setBalance(data.target.value) 
                         // submitData(balance, interest, payment, res => {
                         //     setApiData(res)
@@ -95,7 +155,7 @@ function Repayment() {
                 </Form.Group>
                 <Form.Group className="mb-3">
                     <Form.Label>Interest Rate (Monthly)</Form.Label>
-                    <Form.Select aria-label="Default select example" onChange={data => { 
+                    <Form.Select aria-label="Default select example" value={interest} onChange={data => { 
                         setInterest(data.target.value) 
                         // submitData(balance, interest, payment, res => {
                         //     setApiData(res)
@@ -107,7 +167,7 @@ function Repayment() {
                 </Form.Group>
                 <Form.Group className="mb-3">
                     <Form.Label>Minimum Amount Due Rate (MAD)</Form.Label>
-                    <Form.Select aria-label="Default select example" onChange={data => { 
+                    <Form.Select aria-label="Default select example" value={mad} onChange={data => { 
                         setMad(data.target.value) 
                         // submitData(balance, interest, payment, res => {
                         //     setApiData(res)
@@ -119,7 +179,7 @@ function Repayment() {
                 </Form.Group>
                 <Form.Group className="mb-3">
                     <Form.Label>Monthly Payment</Form.Label>
-                    <Form.Control type="number" placeholder="Enter Monthly Payment"  onChange={data => { 
+                    <Form.Control type="number" placeholder="Enter Monthly Payment" value={payment}  onChange={data => { 
                         setPayment(data.target.value) 
                         // submitData(balance, interest, payment, res => {
                         //     setApiData(res)
@@ -127,7 +187,18 @@ function Repayment() {
                     }}/>
                 </Form.Group>
                 <Stack gap={2} className="col-md-5 mx-auto">
-                    <Button variant="success" onClick={()=>{submitData(balance, interest, mad, payment)}}> Calculate </Button>
+                    {cached ? <Button variant="primary" onClick={()=>{handleShow()}}> View Computation </Button> : null }
+                    <Button variant="success" onClick={()=>{submitData(balance, interest, mad, payment)}}> {cached ? "Recalculate" : "Calculate"}  </Button>
+                    {cached ? <hr></hr> : null }
+                    {cached ? <Button variant="warning" onClick={()=>{clearCache()}}> Reset Form </Button> : null }
+                </Stack>
+                <Stack gap={2} className="col-md-5 mx-auto">
+                    <center>
+                        <br></br>
+                        <span>
+                            Source : { source }
+                        </span>
+                    </center>
                 </Stack>
             </Form>
             <Modal size="lg" show={show} onHide={handleClose}>
@@ -185,7 +256,7 @@ function Repayment() {
                     </Table>
                 </Modal.Body>
                 <Modal.Footer>
-                <Button variant="primary" onClick={handleClose}>
+                <Button variant="danger" onClick={handleClose}>
                     Close
                 </Button>
                 </Modal.Footer>

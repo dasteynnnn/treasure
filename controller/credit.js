@@ -2,7 +2,15 @@ const redis = require('redis');
 const util = require('util');
 
 const redisUrl = process.env.UPSTASH_REDIS_REST_URL || "redis://127.0.0.1:6379"
-const client = redis.createClient(redisUrl);
+//const client = redis.createClient(redisUrl);
+const client = redis.createClient ({
+    url : redisUrl
+});
+
+client.on("error", function(err) {
+    throw err;
+});
+
 client.hget = util.promisify(client.hget)
 
 const helper = require('../helpers/credit')

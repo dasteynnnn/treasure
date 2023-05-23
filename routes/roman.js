@@ -4,6 +4,6 @@ const router = express.Router();
 //CONTROLLERS
 const romanController = require('../controller/roman');
 
-router.get('/convert/:number', romanController.convert)
+router.get('/convert/:number', romanController.convert);
 
 module.exports = router;

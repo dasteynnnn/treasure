@@ -3,6 +3,7 @@ const path = require('path');
 
 const credit = require('./routes/credit');
 const roman = require('./routes/roman');
+const budget = require('./routes/budget');
 
 const app = express();
 
@@ -11,8 +12,8 @@ app.use(express.json());
 
 //routes
 app.use('/api/credit', credit)
-
 app.use('/api/roman', roman)
+app.use('/api/budget', budget)
 
 app.use(express.static('client/build'));
     app.get('*', (req, res) => {

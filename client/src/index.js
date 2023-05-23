@@ -7,7 +7,8 @@ import { Container, Row, Col } from 'react-bootstrap';
 import {
   Navigation,
   Home,
-  Repayment
+  Repayment,
+  BudgetTracker
 } from "./components";
 
 ReactDOM.render(
@@ -20,6 +21,7 @@ ReactDOM.render(
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/finance/calculator/creditCard/repayment" element={<Repayment />} />
+              <Route path="/finance/budget/tracker" element={<BudgetTracker />} />
             </Routes>
           </Col>
         </Row>

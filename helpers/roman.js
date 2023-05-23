@@ -1,5 +1,5 @@
 const romanValues = [
-    { value : 1000, char : "M" },
+    { value : 1000, char : "M"},
     { value : 500, char : "D" },
     { value : 100, char : "C" },
     { value : 50, char : "L" },

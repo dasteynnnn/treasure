@@ -16,7 +16,7 @@ function NavSec() {
                     <Nav className="me-auto">
                         {/* <Nav.Link href="/">Home</Nav.Link> */}
                         <Nav.Link href="/finance/calculator/creditCard/repayment">CC Repayment Calculator</Nav.Link>
-                        <Nav.Link href="/finance/budget/tracker">Budget Trackers</Nav.Link>
+                        <Nav.Link href="/finance/budget/expense/tracker">Expense Trackers</Nav.Link>
                         {/* <NavDropdown title="Finance Services" id="nav-dropdown">
                             <NavDropdown.Item eventKey="4.2" href="/finance/calculator/creditCard/repayment">CC Repayment Calculator</NavDropdown.Item>
                         </NavDropdown> */}

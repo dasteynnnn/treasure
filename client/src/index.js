@@ -8,7 +8,7 @@ import {
   Navigation,
   Home,
   Repayment,
-  BudgetTracker
+  ExpenseTracker
 } from "./components";
 
 ReactDOM.render(
@@ -21,7 +21,7 @@ ReactDOM.render(
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/finance/calculator/creditCard/repayment" element={<Repayment />} />
-              <Route path="/finance/budget/tracker" element={<BudgetTracker />} />
+              <Route path="/finance/budget/expense/tracker" element={<ExpenseTracker />} />
             </Routes>
           </Col>
         </Row>

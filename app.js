@@ -1,6 +1,8 @@
 const express = require('express');
 const path = require('path');
 
+require('dotenv').config()
+
 const credit = require('./routes/credit');
 const roman = require('./routes/roman');
 const budget = require('./routes/budget');

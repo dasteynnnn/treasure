@@ -87,3 +87,8 @@ exports.getResult = (payment, rate, mad, balance, paymentTotal, interestTotal, m
 
     return this.getResult(payment, rate, mad, newBalance, paymentTotal + payment, interestTotal + interest, months + 1, transactions)
 }
+
+exports.getMad = (percentage, balance) => {
+    console.log(balance * percentage)
+    return balance * percentage
+}
